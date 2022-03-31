@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Server GIT</title>
+    <link href="prism.css" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <script src="prism.js"></script>
+    <hr />
+    <h2><b>Descripcio del problema</b></h2>
+    <p>
+      The objective of this practice is to be able to create a local repository
+      per to be able to use it dins of the company on these trebalant. the boss
+      you you need the following:
+    </p>
+    <ul>
+      <li>Initialization of the Repository.</li>
+      <li>Working copy status.</li>
+      <li>Add files to the working copy.</li>
+      <li>Delete files from the working copy.</li>
+      <li>Save work copy changes to the Repository (commit).</li>
+      <li>Add comments about changes.</li>
+      <li>
+        Creation and use of various repositories by different departments.
+      </li>
+      <li>Creation and use of new branches of software version.</li>
+      <li>Fusion of 2 branches into one.</li>
+      <li>Add tags to versions.</li>
+      <li>Add a remote repository</li>
+    </ul>
+    <hr />
+    <h2><b>Algorisme de la solució</b></h2>
+    <ol class="d">
+      <li>Configure Virtual Machines</li>
+      <li>Cnnect the machines (private NAT Network)</li>
+      <li>Install service GIT on VMs</li>
+      <li>Configure git and ssh service</li>
+      <li>Create a repository on te git server</li>
+      <li>Configure client to conect with the server</li>
+      <li>Finaly we can pull, clone and others actions to the repository</li>
+    </ol>
+    <hr />
+    <h2><b>Diagrama de la solució</b></h2>
+    <img src="./img/Network.png" alt="" />
+    <hr />
+    <h2><b>Configuració de la solució</b></h2>
+    <h3>Instalar Git con apt-get</h3>
+    <ol class="d">
+      <li>
+        To begin we must execute the general updates of the operating system and
+        its packages, in the case of Ubuntu we open the terminal and execute the
+        following command:
+      </li>
+      <pre class="lenguage-bash">
+          <code class="language-bash">
+          $ sudo apt-get update
+          </code>
+       </pre>
+      <li>Git is installed with the following command:</li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ sudo apt-get install git
+        </code>
+      </pre>
+      <li>
+        To verify that the installation was successful and what version of git
+        is installed we type:
+      </li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ git --version
+        </code>
+      </pre>
+      <p>
+        If everything has gone well, the following response should be displayed
+        depending on the version that has been installed, in this case we have
+        version 2.25.1 (25/03/2022):
+      </p>
+      <img src="./img/git_version.png" alt="" />
+    </ol>
+    <h3>Configure Git</h3>
+    <ol class="d">
+      <li>
+        Configure your username with the command shown below and replace First
+        Name Last Name with your name:
+      </li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ git config --global user.name "Pau Motos"
+        </code>
+      </pre>
+      <li>
+        Set up your Git email using the following command, replacing
+        email@domain.com with yours:
+      </li>
+      <pre class="lenguage-bash" style="font-size: 12px">
+        <code class="language-bash">
+          $ git config --global user.email pmotos@insdanielblanxart.cat
+        </code>
+      </pre>
+      <li>
+        If we want to validate what we have configured, we execute the following
+        command and check it:
+      </li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ git config --list
+        </code>
+      </pre>
+      <img src="./img/config_list.png" alt="" style="margin-top: -20px" />
+      <li>Next, create a new user that will manage Git repositories:</li>
+      <pre class="lenguage-bash" style="font-size: 12px">
+        <code class="language-bash">
+          $ sudo useradd -r -m -U -d /home/git -s /bin/bash git
+        </code>
+      </pre>
+      <li>
+        The user's home directory is set to /home/git. All repositories will be
+        stored in this directory. We have not set a password for the "git" user,
+        access will only be possible using ssh keys. Switch to the "git" user
+        using the commandsu
+      </li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ sudo su - git
+        </code>
+      </pre>
+      <img src="./img/sudo_su_git.png" alt="" style="margin-top: -20px" />
+      <li>
+        Run the following commands to create the SSH directory and set the
+        correct permissions:
+      </li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ mkdir -p ~/.ssh && chmod 0700 ~/.ssh
+        </code>
+      </pre>
+      <li>
+        Create a file called ~/.ssh/authorized_keyswhich will contain the SSH
+        keys of the authorized users:
+      </li>
+      <pre class="lenguage-bash" style="font-size: 12px">
+        <code class="language-bash">
+          $ touch ~/.ssh/authorized_keys && chmod 0600 ~/.ssh/authorized_keys
+        </code>
+      </pre>
+      <li>
+        That's it. The server installation is complete. You are now ready to
+        create your first Git repository. Run the following command to start a
+        new empty repository:
+      </li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ git init --bare ~/motos_project.git
+        </code>
+      </pre>
+      <img src="./img/new_repository.png" alt="" style="margin-top: -20px" />
+      <h3><b>Configure the local Git repository</b></h3>
+      <li>
+        To push local git changes to the Git server, you need to add the local
+        user's SSH public key to theauthorized_keys. <br /><br />If you already
+        have an SSH key pair created on your local system, you can view the
+        public key by typing:
+      </li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ cat ~/.ssh/id_rsa.pub
+        </code>
+      </pre>
+      <img src="./img/autoritzek_key.png" alt="" style="margin-top: -20px" />
+      <li>
+        No such file or directory, it means that an SSH key pair has not been
+        generated on the local computer.
+        <br /><br />
+        Generate a new SSH key pair, use the following command:
+      </li>
+      <pre class="lenguage-bash" style="font-size: 12px">
+        <code class="language-bash">
+          $ ssh-keygen -t rsa -b 4096 -C "nome_utente@domain.com"
+        </code>
+      </pre>
+      <li>
+        (SERVER)Copy the output from catabove and go back to the Git server
+        console.
+        <br /><br />
+        On the server, open the text editor and paste the public key you copied
+        from your local computer into the ~/.ssh/authorized_keys:
+      </li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ nano /home/git/.ssh/authorized_keys
+        </code>
+      </pre>
+      <img
+        src="./img/aitorized_keys_server.png"
+        alt=""
+        style="margin-top: -20px"
+      />
+      <li>
+        Let's assume that the Git package is already installed on your local
+        computer. If not, install it as explained in the previous sections.
+        <br /><br />If you have an existing unverified project, go to the
+        project directory. If you're starting from scratch, create the project
+        directory and navigate to it:
+      </li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ cd /home/git/motos_repository/proyecto1.git/
+        </code>
+      </pre>
+      <img
+        src="./img/proyecto_git_cliente.png"
+        alt=""
+        style="margin-top: -20px"
+      />
+      <li>Initialize a git repository:</li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ git init .
+        </code>
+      </pre>
+      <li>The last step is to add git remote to the local repository:</li>
+      <pre class="lenguage-bash" style="font-size: 14px">
+        <code class="language-bash">
+          $ git remote add origin git@10.0.2.4:motos_project.git
+        </code>
+      </pre>
+      <p>
+        *Don't forget to replace git_server_ipwith the hostname or IP address of
+        the Git server.*
+      </p>
+      <li>
+        To verify that everything is configured correctly, create a test file :
+      </li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ touch test_file
+        </code>
+      </pre>
+      <li>Add the changes to the staging area:</li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ git add .
+        </code>
+      </pre>
+      <li>Confirm changes:</li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ git commit -m "descriptive message"
+        </code>
+      </pre>
+      <img src="./img/git_init.png" alt="" style="margin-top: -20px" />
+      <li>Push the changes to the local repository on a remote repository:</li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ git push -u origin master
+        </code>
+      </pre>
+      <img src="./img/git_push.png" alt="" style="margin-top: -20px" />
+      <li>Delete files from branch:</li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ git git rm delete_this.txt 
+        </code>
+      </pre>
+      <img src="./img/delete.png" alt="" style="margin-top: -20px" />
+      <li>Manipulation of the branch:</li>
+      <p>
+        The idea is to create a new branch to be able to fix problems and then
+        return the fixed file to its original branch.
+      </p>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ git checkout new_branch
+        </code>
+      </pre>
+      <img src="./img/new_branch.png" alt="" style="margin-top: -20px" />
+      <li>Change to the master branch</li>
+      <img src="./img/cambiar_rama.png" alt="" />
+      <li>Git remote public github repository</li>
+      <p>Html document: <a>https://github.com/paumotos/dec-pmotos</a></p>
+      <pre class="lenguage-bash" style="font-size: 13px">
+        <code class="language-bash">
+          $ git remote add index https://github.com/paumotos/dec-pmotos
+        </code>
+      </pre>
+      <img src="./img/git_remote.png" alt="" style="margin-top: -20px" />
+      <li>Git clone repository</li>
+      <pre class="lenguage-bash" style="font-size: 14px">
+        <code class="language-bash">
+          $ git clone https://github.com/paumotos/dec-pmotos
+        </code>
+      </pre>
+      <img src="./img/clonar_reposit.png" alt="" style="margin-top: -20px" />
+      <li>
+        The git command is used to add a tag to the latest version added to the
+        repository git tag -a. For example:
+      </li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ git tag -a v1.1 -m "Segona versió"
+        </code>
+      </pre>
+      <img src="./img/git_tag.png" alt="" style="margin-top: -20px" />
+      <li>Discard changes</li>
+      <pre class="lenguage-bash">
+        <code class="language-bash">
+          $ git reset --hard
+        </code>
+      </pre>
+      <img
+        src="./img/resetear_versiones.png"
+        alt=""
+        style="margin-top: -20px"
+      />
+    </ol>
+    <hr />
+    <h2>WEBGRAFIA</h2>
+    <a
+      href="https://noviello.it/es/como-instalar-y-configurar-un-servidor-git-en-linux/"
+      >Cómo instalar y configurar un servidor Git en Linux</a
+    >
+  </body>
+</html>

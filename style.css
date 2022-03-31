@@ -1,0 +1,27 @@
+ol.d {
+  list-style-type: decimal;
+}
+
+body {
+  width: 650px;
+  margin-left: 34%;
+}
+
+h2,
+a {
+  text-align: center;
+}
+
+pre.lenguage-bash {
+  background-color: #dfdfdf;
+  font-size: 15px;
+  display: flex;
+  border-radius: 20px;
+  margin-bottom: 60px;
+  margin-top: 20px;
+}
+
+img {
+  width: 100%;
+  margin-bottom: 20px;
+}
